@@ -1,0 +1,14 @@
+<pool type='dir'>
+  <name>default</name>
+  <source>
+  </source>
+  <target>
+    <path>/home/libvirt</path>
+    <permissions>
+      <mode>0755</mode>
+      <owner>qemu</owner>
+      <group>qemu</group>
+      <label>unconfined_u:object_r:home_root_t:s0</label>
+    </permissions>
+  </target>
+</pool>
