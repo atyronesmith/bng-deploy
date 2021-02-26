@@ -7,11 +7,25 @@ source "utils.sh"
 VERBOSE="false"
 export VERBOSE
 
-while getopts ":ho:v" opt; do
+usage() {
+    cat <<-EOM
+    Start/Stop dnsmasq for OCP cluster 
+
+    Usage:
+        $(basename "$0") [-h] command 
+
+            start        - Start the $CONTAINER_NAME container 
+            stop         - Stop the $CONTAINER_NAME container
+            remove       - Stop and remove the $CONTAINER_NAME container
+            restart      - Restart $CONTAINER_NAME to reload config files
+
+
+    Options
+EOM
+}
+
+while getopts ":hv" opt; do
     case ${opt} in
-    o)
-        out_dir=$OPTARG
-        ;;
     v)
         VERBOSE="true"
         ;;
