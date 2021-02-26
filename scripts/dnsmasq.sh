@@ -1,8 +1,11 @@
 #!/usr/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
+
 # shellcheck disable=SC1091
-source "common.sh"
-source "utils.sh"
+source "$SCRIPT_DIR/common.sh"
+source "$SCRIPT_DIR/utils.sh"
 
 VERBOSE="false"
 export VERBOSE
@@ -54,9 +57,11 @@ start)
         (podman_rm "$CONTAINER_NAME" ||
             printf "Could not remove %s!\n" "$CONTAINER_NAME")
 
+    mkdir -p "$SCRIPT_DIR/../dnsmasq/var/run"
+
     if ! cid=$(sudo podman run -d --name "$CONTAINER_NAME" --net=host \
-        -v "$SCRIPT_DIR/../dnsmasq/bm/var/run:/var/run/dnsmasq:Z" \
-        -v "$SCRIPT_DIR/../dnsmasq.d:/etc/dnsmasq.d:Z" \
+        -v "$SCRIPT_DIR/../dnsmasq/var/run:/var/run/dnsmasq:Z" \
+        -v "$SCRIPT_DIR/../dnsmasq/etc/dnsmasq.d:/etc/dnsmasq.d:Z" \
         --expose=53 --expose=53/udp --expose=67 --expose=67/udp --expose=69 \
         --expose=69/udp --cap-add=NET_ADMIN "$CONTAINER_IMAGE" \
         --conf-file=/etc/dnsmasq.d/dnsmasq.conf -u root -d -q); then
