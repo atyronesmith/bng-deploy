@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PROJECT_DIR
+
 export MEMORY=16384
 export VCPUS=8
 export IMAGE_SIZE=100
@@ -15,3 +18,6 @@ export PUB_CONN=p3p1
 export PUB_IP=192.168.1.4/24
 export PUB_GW=192.168.1.4
 export BRIDGE=br-ctlplane
+
+export CONTAINER_NAME="dnsmasq-bm"
+export CONTAINER_IMAGE="quay.io/poseidon/dnsmasq"
