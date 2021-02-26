@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export PROJECT_DIR
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
 
 export MEMORY=16384
 export VCPUS=8

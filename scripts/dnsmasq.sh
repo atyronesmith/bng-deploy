@@ -55,7 +55,8 @@ start)
             printf "Could not remove %s!\n" "$CONTAINER_NAME")
 
     if ! cid=$(sudo podman run -d --name "$CONTAINER_NAME" --net=host \
-        -v "$PROJECT_DIR/dnsmasq.d:/etc/dnsmasq.d:Z" \
+        -v "$SCRIPT_DIR/../dnsmasq/bm/var/run:/var/run/dnsmasq:Z" \
+        -v "$SCRIPT_DIR/../dnsmasq.d:/etc/dnsmasq.d:Z" \
         --expose=53 --expose=53/udp --expose=67 --expose=67/udp --expose=69 \
         --expose=69/udp --cap-add=NET_ADMIN "$CONTAINER_IMAGE" \
         --conf-file=/etc/dnsmasq.d/dnsmasq.conf -u root -d -q); then
