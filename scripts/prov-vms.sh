@@ -17,7 +17,8 @@ virt-install \
   --events on_reboot=restart \
   --wait=-1 \
   --noautoconsole \
-  --quiet
+  --graphics vnc,listen=127.0.0.1 \
+  --quiet &
 
 
 # Create Master1 VM
@@ -34,7 +35,8 @@ virt-install \
   --events on_reboot=restart \
   --wait=-1 \
   --noautoconsole \
-  --quiet
+  --graphics vnc,listen=127.0.0.1 \
+  --quiet &
 
 # Create Master2 VM
 virt-install \
@@ -50,4 +52,5 @@ virt-install \
   --events on_reboot=restart \
   --wait=-1 \
   --noautoconsole \
-  --quiet
+  --graphics vnc,listen=127.0.0.1 \
+  --quiet &
