@@ -1,11 +1,8 @@
 #!/usr/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export SCRIPT_DIR
-
 export MEMORY=16384
 export VCPUS=8
-export IMAGE_SIZE=100
+export IMAGE_SIZE=120
 export MASTER0_MAC=00:16:3e:78:ab:00
 export MASTER1_MAC=00:16:3e:78:ab:01
 export MASTER2_MAC=00:16:3e:78:ab:02
@@ -19,5 +16,5 @@ export PUB_IP=192.168.1.4/24
 export PUB_GW=192.168.1.4
 export BRIDGE=br-ctrlplane
 
-export CONTAINER_NAME="dnsmasq-bm"
+export CONTAINER_NAME="dnsmasq"
 export CONTAINER_IMAGE="quay.io/poseidon/dnsmasq"

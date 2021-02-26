@@ -1,7 +1,10 @@
 #!/usr/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
+
 # shellcheck source=common.sh
-source common.sh
+source "$SCRIPT_DIR/common.sh"
 
 # Create Master1 VM
 virt-install \
@@ -20,6 +23,7 @@ virt-install \
   --graphics vnc,listen=127.0.0.1 \
   --quiet &
 
+sleep 2
 
 # Create Master1 VM
 virt-install \
@@ -37,6 +41,8 @@ virt-install \
   --noautoconsole \
   --graphics vnc,listen=127.0.0.1 \
   --quiet &
+
+sleep 2 
 
 # Create Master2 VM
 virt-install \
