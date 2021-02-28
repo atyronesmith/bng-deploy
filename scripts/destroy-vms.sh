@@ -1,7 +1,10 @@
 #!/usr/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
+
 # shellcheck source=common.sh
-source common.sh
+source "$SCRIPT_DIR/common.sh"
 
 set -e
 
