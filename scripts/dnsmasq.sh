@@ -63,7 +63,7 @@ start)
         -v "$SCRIPT_DIR/../dnsmasq/var/run:/var/run/dnsmasq:Z" \
         -v "$SCRIPT_DIR/../dnsmasq/etc/dnsmasq.d:/etc/dnsmasq.d:Z" \
         --expose=53 --expose=53/udp --expose=67 --expose=67/udp --expose=69 \
-        --expose=69/udp --cap-add=NET_ADMIN "$CONTAINER_IMAGE" \
+        --expose=69/udp --cap-add=NET_RAW --cap-add=NET_ADMIN "$CONTAINER_IMAGE" \
         --conf-file=/etc/dnsmasq.d/dnsmasq.conf -u root -d -q); then
         printf "Could not start %s container!\n" "$CONTAINER_NAME"
         exit 1
