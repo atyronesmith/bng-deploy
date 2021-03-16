@@ -1,0 +1,32 @@
+apiVersion: performance.openshift.io/v2
+kind: PerformanceProfile
+metadata:
+  name: bng
+spec:
+  additionalKernelArgs:
+  - nmi_watchdog=0
+  - audit=0
+  - mce=off
+  - processor.max_cstate=1
+  - idle=poll
+  - intel_idle.max_cstate=0
+  - intel_pstate=disable
+  cpu:
+    balanceIsolated: true
+    isolated: 6-55,62-111
+    reserved: 0-5,56-61
+  hugepages:
+    defaultHugepagesSize: 2M
+    pages:
+    - count: 15000
+      node: 0
+      size: 2M
+    - count: 15000
+      node: 1
+      size: 2M
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+  numa:
+    topologyPolicy: single-numa-node
+  realTimeKernel:
+    enabled: false
