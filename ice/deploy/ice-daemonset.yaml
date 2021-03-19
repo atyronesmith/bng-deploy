@@ -1,0 +1,50 @@
+---
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: ice-daemon
+  namespace: bng
+spec:
+  selector:
+    matchLabels:
+      app: ice-daemon
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ice-daemon
+        component: network
+        type: infra
+        openshift.io/component: network
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ''
+      serviceAccountName: ice-driver-daemon
+      containers:
+      - name: ice-driver-daemon
+        image: ice-driver
+        command:
+          - /bin/sleep
+          - 3650d
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        # args:
+        #   - "start"
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        volumeMounts:
+        - name: host
+          mountPath: /host
+      volumes:
+      - name: host
+        hostPath:
+          path: /

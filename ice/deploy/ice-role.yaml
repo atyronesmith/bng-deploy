@@ -1,0 +1,27 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ice-driver-daemon
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - '*'
+- apiGroups:
+  - k8s.cni.cncf.io
+  resources:
+  - '*'
+  - NetworkAttachmentDefinition
+  verbs:
+  - '*'
+- apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - privileged
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use

@@ -1,0 +1,19 @@
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: ice-driver
+  namespace: bng
+  labels:
+    build: ice-driver
+spec:
+  dockerImageRepository: 'image-registry.openshift-image-registry.svc:5000/bng/ice-driver'
+  lookupPolicy:
+    local: true
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: 'ice-driver:latest'
+      importPolicy: {}
+      referencePolicy:
+        type: Source
