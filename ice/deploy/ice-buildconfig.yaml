@@ -22,9 +22,9 @@ spec:
     type: Git
   strategy:
     dockerStrategy:
-      buildArgs:
-      - name: BUILD_KERNEL
-        value: 4.18.0-240.15.1.el8_3.x86_64
+      # buildArgs:
+      # - name: BUILD_KERNEL
+      #   value: 4.18.0-240.15.1.el8_3.x86_64
       from:
         kind: ImageStreamTag
         name: centos:8

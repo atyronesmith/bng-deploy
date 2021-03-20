@@ -1,0 +1,51 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: centos-debug
+  namespace: bng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: centos-debug
+  template:
+    metadata:
+      labels:
+        app: centos-debug
+    spec:
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: centos-debug-container
+          command:
+            - /bin/sleep
+            - 3650d
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: File
+          image: 'centos:8'
+          volumeMounts:
+            - name: host
+              mountPath: /host
+      volumes:
+        - name: host
+          hostPath:
+            path: /
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: ice-driver-daemon
+      serviceAccount: ice-driver-daemon
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
