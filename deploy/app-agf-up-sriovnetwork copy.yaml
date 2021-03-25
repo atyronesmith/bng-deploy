@@ -1,0 +1,11 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: app-agf-up
+  namespace: openshift-sriov-network-operator
+spec:
+  ipam: '{}'
+  linkState: enable
+  networkNamespace: bng
+  resourceName: app_agf_up
+  spoofChk: 'off'

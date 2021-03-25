@@ -1,0 +1,13 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: intra-dcf
+  namespace: openshift-sriov-network-operator
+spec:
+  ipam: '{}'
+  linkState: enable
+  networkNamespace: bng
+  resourceName: intradcf
+  spoofChk: 'off'
+  trust: 'on'
+  vlan: 2000

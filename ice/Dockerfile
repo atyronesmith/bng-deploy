@@ -1,11 +1,16 @@
 FROM centos:8 AS builder
 
+ARG BUILD_KERNEL
+
 RUN dnf makecache \  
-  && dnf group install "Development Tools" -y \
-  && dnf install -y wget elfutils-libelf-devel module-init-tools \
-  && export KVER=$(chroot /host uname -r) \
-  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-devel-$KVER.rpm" \
-  && yum -y localinstall "kernel-devel-$(uname -r).rpm"
+#  && dnf group install "Development Tools" -y \
+  && dnf install -y wget \
+  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-headers-$BUILD_KERNEL.rpm" \
+  && yum -y localinstall "kernel-headers-$BUILD_KERNEL.rpm" \
+  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-devel-$BUILD_KERNEL.rpm" \
+  && yum -y localinstall "kernel-devel-$BUILD_KERNEL.rpm" \
+  && dnf install gcc make rpm-build -y \
+  && dnf install -y elfutils-libelf-devel module-init-tools 
 
 FROM builder AS compiler
 
@@ -23,6 +28,7 @@ LABEL io.k8s.display-name="ice driver $driver_version" \
 
 ARG builddir=/root/ice
 ARG driver_version=1.3.2
+ARG BUILD_KERNEL
 
 RUN mkdir -p $builddir
 
@@ -30,11 +36,10 @@ COPY --from=compiler $builddir/RPMS/x86_64/ice-$driver_version-1.x86_64.rpm $bui
 
 RUN dnf makecache \
   && dnf install -y wget \
-  && export KVER=$(chroot /host uname -r) \
-  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-devel-$KVER.rpm" \
-  && yum localinstall -y "kernel-devel-$KVER.rpm" \
-  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-core-$KVER.rpm" \
-  && yum localinstall -y "kernel-core-$KVER.rpm" \
+  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-headers-$BUILD_KERNEL.rpm" \
+  && yum localinstall -y "kernel-headers-$BUILD_KERNEL.rpm" \
+  && wget "http://mirror.centos.org/centos/8/BaseOS/x86_64/os/Packages/kernel-core-$BUILD_KERNEL.rpm" \
+  && yum localinstall -y "kernel-core-$BUILD_KERNEL.rpm" \
   && dnf install -y $builddir/ice-$driver_version-1.x86_64.rpm \
   && dnf clean all
 
