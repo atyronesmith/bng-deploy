@@ -64,7 +64,7 @@ build() {
     (cd filetranspiler && git checkout 1.1.3)
 
     ./filetranspiler/filetranspile -i ./baseconfig.ign -f "${FAKEROOT}" --format=yaml \
-        --dereference-symlinks | sed 's/^/     /' | (cat mc-base.yaml -) >mc.yaml
+        --dereference-symlinks | sed 's/^/     /' | (cat mc-base.yaml -) >ice-mc.yaml
 }
 
 list_kernel_headers() {
