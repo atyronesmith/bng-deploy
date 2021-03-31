@@ -1,4 +1,20 @@
-# bng-deploy
+# Contents
+
+## ice
+
+This directory contains a script to build a MachineConfig object that installs the 1.3.2 version of the Intel Ice driver
+
+## deploy
+
+This directory contains the manifests necessary to deploy the BNG
+
+## dnsmasq
+
+This directory contains the files necessary to deploy the required dnsmasq for DNS
+
+## The following commands were used to setup the physical environment bng-deploy
+
+### Packages
 
 yum install vim wget git
 yum install epel-release
@@ -11,6 +27,8 @@ yum groupinstall "X Window System"
 yum install tcpdump dig bind-utils jq
 yum install podman
 
+### Enable virtualization
+
 virt-host-validate
 vi /etc/default/grub
 grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
@@ -18,7 +36,7 @@ grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
 virsh pool-define-as --name default --type dir --target /home/libvirt
 virsh pool-autostart default
 
-## firewall
+## Firewall rules
 
 firewall-cmd --zone internal --permanent --change-interface=br-ctrlplane
 firewall-cmd --zone=internal --permanent --add-port=67/udp
