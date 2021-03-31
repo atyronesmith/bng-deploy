@@ -1,48 +1,67 @@
 #!/bin/bash
 
+set -e
+
 usage() {
     prog=$(basename "$0")
     cat <<-EOM
     Build MachineConfig for ice driver
 
     Usage:
-        $prog [/path/]entitlement.pem
-            entitlement.pem -- File containing certs/keys to enable privileged kernel deploys.
+        $prog command [arguments]
+            build /path/entitlements    -- Build cm.yaml
+            headers /path/entitlements   -- List available kernel-headers
+                
+        /path/entitlements -- Directory containing certs/keys to enable privileged kernel deploys.
 EOM
 }
 
 build() {
-    local entitlement="$1"
+    local entitlements="$1"
 
-    if [ ! -e "$entitlement" ]; then
-        printf >&2 "Cannot access entitlement file: %s\n" "$entitlement"
+    if [ ! -d "$entitlements" ]; then
+        printf >&2 "Cannot access entitlements directory: %s\n" "$entitlements"
         exit 1
     fi
 
+    printf "Reading certs from: %s\n" "$entitlements"
+
     FAKEROOT=$(mktemp -d)
 
-    cp "$entitlement" "${FAKEROOT}"/etc/pki/entitlement/entitlement.pem || exit
-    cp "$entitlement" "${FAKEROOT}"/etc/pki/entitlement/entitlement-key.pem || exit
+    mkdir -p "${FAKEROOT}"/etc/rhsm
+
+    cp ./rhsm.conf "${FAKEROOT}"/etc/rhsm
+
+    mkdir -p "${FAKEROOT}"/etc/pki/entitlement
+
+    for f in "${entitlements}"/*.pem; do
+        base=${f##*/}
+        cp "$f" "${FAKEROOT}/etc/pki/entitlement/${base}"
+    done
+
+    # tar -czf subs.tar.gz /etc/pki/entitlement/ /etc/rhsm/ /etc/yum.repos.d/redhat.repo
+    # tar -x -C "${FAKEROOT}" -f subs.tar.gz
+    # rm subs.tar.gz
 
     if [ ! -d kmods-via-containers ]; then
-        git clone https://github.com/kmods-via-containers/kmods-via-containers || exit
+        git clone https://github.com/kmods-via-containers/kmods-via-containers
     fi
 
     (cd kmods-via-containers && git pull --no-rebase &&
-        make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/) || exit
+        make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/)
 
     if [ ! -d kvc-ice-kmod ]; then
-        git clone https://github.com/atyronesmith/kvc-ice-kmod.git || exit
+        git clone https://github.com/atyronesmith/kvc-ice-kmod.git
     fi
 
     (cd kvc-ice-kmod && git pull --no-rebase &&
-        make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/) || exit
+        make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/)
 
     if [ ! -d filetranspiler ]; then
-        git clone https://github.com/ashcrow/filetranspiler || exit
+        git clone https://github.com/ashcrow/filetranspiler
     fi
 
-    (cd filetranspiler && git checkout 1.1.3) || exit
+    (cd filetranspiler && git checkout 1.1.3)
 
     ./filetranspiler/filetranspile -i ./baseconfig.ign -f "${FAKEROOT}" --format=yaml \
         --dereference-symlinks | sed 's/^/     /' | (cat mc-base.yaml -) >mc.yaml
@@ -51,9 +70,9 @@ build() {
 list_kernel_headers() {
     local entitlement="$1"
 
-    podman run -ti --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement.pem  \
-     --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement-key.pem \
-     registry.access.redhat.com/ubi8:latest bash -c "dnf search kernel-devel --showduplicates"
+    podman run --rm -ti --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement.pem \
+        --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement-key.pem \
+        registry.access.redhat.com/ubi8:latest bash -c "dnf search kernel-devel --showduplicates"
 }
 
 while getopts ":h" opt; do
@@ -80,7 +99,7 @@ fi
 case "$COMMAND" in
 build)
     if [ "$#" -lt 1 ]; then
-        printf >&2 "%s requires [/path/]entitlement.pem arg\n" "$PROGRAM"
+        printf >&2 "%s missing 1 arg\n" "$PROGRAM"
         usage
         exit 1
     fi
@@ -88,7 +107,7 @@ build)
     ;;
 headers)
     if [ "$#" -lt 1 ]; then
-        printf >&2 "%s requires [/path/]entitlement.pem arg\n" "$PROGRAM"
+        printf >&2 "%s requires 1 arg\n" "$PROGRAM"
         usage
         exit 1
     fi
