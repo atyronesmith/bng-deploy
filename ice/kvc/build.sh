@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DDP_PKG="https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip"
+
 set -e
 
 usage() {
@@ -16,7 +18,7 @@ usage() {
 EOM
 }
 
-build() {
+build_ice_kmod() {
     local entitlements="$1"
 
     if [ ! -d "$entitlements" ]; then
@@ -25,6 +27,8 @@ build() {
     fi
 
     printf "Reading certs from: %s\n" "$entitlements"
+
+    mkdir -p build
 
     FAKEROOT=$(mktemp -d)
 
@@ -43,28 +47,88 @@ build() {
     # tar -x -C "${FAKEROOT}" -f subs.tar.gz
     # rm subs.tar.gz
 
-    if [ ! -d kmods-via-containers ]; then
-        git clone https://github.com/kmods-via-containers/kmods-via-containers
+    if [ ! -d build/kmods-via-containers ]; then
+        (
+            cd build
+            git clone https://github.com/kmods-via-containers/kmods-via-containers
+        )
     fi
 
-    (cd kmods-via-containers && git pull --no-rebase &&
+    (cd build/kmods-via-containers && git pull --no-rebase &&
         make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/)
 
-    if [ ! -d kvc-ice-kmod ]; then
-        git clone https://github.com/atyronesmith/kvc-ice-kmod.git
+    if [ ! -d build/kvc-ice-kmod ]; then
+        (
+            cd build
+            git clone https://github.com/atyronesmith/kvc-ice-kmod.git
+        )
     fi
 
-    (cd kvc-ice-kmod && git pull --no-rebase &&
+    (cd build/kvc-ice-kmod && git pull --no-rebase &&
         make install DESTDIR="${FAKEROOT}"/usr/local CONFDIR="${FAKEROOT}"/etc/)
 
-    if [ ! -d filetranspiler ]; then
-        git clone https://github.com/ashcrow/filetranspiler
+    if [ ! -d build/filetranspiler ]; then
+        (
+            cd build
+            git clone https://github.com/ashcrow/filetranspiler
+        )
     fi
 
-    (cd filetranspiler && git checkout 1.1.3)
+    (cd build/filetranspiler && git checkout 1.1.3)
 
-    ./filetranspiler/filetranspile -i ./baseconfig.ign -f "${FAKEROOT}" --format=yaml \
+    ./build/filetranspiler/filetranspile -i ./baseconfig.ign -f "${FAKEROOT}" --format=yaml \
         --dereference-symlinks | sed 's/^/     /' | (cat mc-base.yaml -) >ice-mc.yaml
+}
+
+list_kernel_headers() {
+    local entitlement="$1"
+
+    podman run --rm -ti --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement.pem \
+        --mount type=bind,source="$entitlement",target=/etc/pki/entitlement/entitlement-key.pem \
+        registry.access.redhat.com/ubi8:latest bash -c "dnf search kernel-devel --showduplicates"
+}
+
+build_ice_pkg() {
+
+    mkdir -p build
+
+    FAKEROOT=$(mktemp -d)
+
+    (
+        # The URL to the comms package associated with the version of the ice driver
+        # is set in the kvc-ice-kmod repo, ice-kmod.conf file
+        #
+        mkdir -p build/package
+
+        # shellcheck disable=SC1091
+        source build/kvc-ice-kmod/ice-kmod.conf
+
+        package_zip_file=$(basename "$KMOD_SOFTWARE_EXTRA_1")
+
+        cd build/package
+
+        if [ ! -e "$package_zip_file" ]; then
+            wget "$KMOD_SOFTWARE_EXTRA_1"
+        fi
+
+        mkdir -p "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/"
+        unzip "$package_zip_file" -d "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/"
+        rm -fv "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
+        package_file="${package_zip_file%.zip}.pkg"
+        mv -f "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/$package_file" "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
+    )
+
+    if [ ! -d build/filetranspiler ]; then
+        (
+            cd build
+            git clone https://github.com/ashcrow/filetranspiler
+        )
+    fi
+
+    (cd build/filetranspiler && git checkout 1.1.3)
+
+    ./build/filetranspiler/filetranspile -i ./baseconfig-pkg.ign -f "${FAKEROOT}" --format=yaml \
+        --dereference-symlinks | sed 's/^/     /' | (cat mc-pkg-base.yaml -) >ice-pkg-mc.yaml
 }
 
 list_kernel_headers() {
@@ -103,7 +167,8 @@ build)
         usage
         exit 1
     fi
-    build "$1"
+    build_ice_kmod "$1"
+    build_ice_pkg
     ;;
 headers)
     if [ "$#" -lt 1 ]; then

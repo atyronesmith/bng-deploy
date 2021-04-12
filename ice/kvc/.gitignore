@@ -1,4 +1,3 @@
-kmods-via-containers
-kvc-ice-kmod
-filetranspiler
+build
 ice-mc.yaml
+ice-pkg-mc.yaml
