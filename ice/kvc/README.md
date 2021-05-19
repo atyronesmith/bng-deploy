@@ -2,7 +2,7 @@
 
 This project is used to build a MachineConfig object, *ice-mc.yaml*, that installs a newer version of the Intel ice driver.  
 
-This project uses the [kmods-via-containers](https://github.com/kmods-via-containers/kmods-via-containers) projects to load kernel modules using containers.  The [kvc-ice-kmod](https://github.com/atyronesmith/kvc-ice-kmod) project is a companion to this project and implements some of the *kmods-via-containers* project requirements.
+This project uses the [kmods-via-containers](https://github.com/openshift-psap/kmods-via-containers) projects to load kernel modules using containers.  The [kvc-ice-kmod](https://github.com/atyronesmith/kvc-ice-kmod) project is a companion to this project and implements some of the *kmods-via-containers* project requirements.
 
 The *build.sh* script enables the **Cluster-Wide Entitled Builds on OpenShift
 ** method as outlined in this [blog](https://www.openshift.com/blog/how-to-use-entitled-image-builds-to-build-drivercontainers-with-ubi-on-openshift)

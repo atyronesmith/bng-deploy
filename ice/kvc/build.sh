@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export DDP_PKG="https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip"
+export ICE_PKG_ROOT="/var"
 
 set -e
 
@@ -50,7 +51,7 @@ build_ice_kmod() {
     if [ ! -d build/kmods-via-containers ]; then
         (
             cd build
-            git clone https://github.com/kmods-via-containers/kmods-via-containers
+            git clone https://github.com/openshift-psap/kmods-via-containers
         )
     fi
 
@@ -111,11 +112,11 @@ build_ice_pkg() {
             wget "$KMOD_SOFTWARE_EXTRA_1"
         fi
 
-        mkdir -p "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/"
-        unzip "$package_zip_file" -d "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/"
-        rm -fv "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
+        mkdir -p "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/"
+        unzip "$package_zip_file" -d "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/"
+        rm -fv "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
         package_file="${package_zip_file%.zip}.pkg"
-        mv -f "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/$package_file" "${FAKEROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
+        mv -f "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/$package_file" "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/ice.pkg"
     )
 
     if [ ! -d build/filetranspiler ]; then

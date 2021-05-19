@@ -4,6 +4,7 @@ metadata:
   name: bng
 spec:
   additionalKernelArgs:
+  - firmware_class.path='/var/lib/firmware/updates/intel/ice/ddp/'
   - nmi_watchdog=0
   - audit=0
   - mce=off
