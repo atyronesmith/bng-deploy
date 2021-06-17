@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kmod-driver-container
+spec:
+  selector:
+    matchLabels:
+      app: kmod-driver-container
+  template:
+    metadata:
+      labels:
+        app: kmod-driver-container
+  spec:
+    serviceAccount: kmod-driver-container
+    serviceAccountName: kmod-driver-container
+    containers:
+      - image: image-registry.openshift-image-registry.svc:5000/kmod-ice/kmod-driver-container:1.3.2
+        name: kmod-driver-container
+        imagePullPolicy: Always
+        command: ["/sbin/init"]
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                [
+                  "/bin/sh",
+                  "-c",
+                  "systemctl stop kmods-via-containers@kvc-ice-kmod",
+                ]
+        securityContext:
+          privileged: true
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""

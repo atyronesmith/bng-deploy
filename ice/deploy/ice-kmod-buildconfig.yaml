@@ -1,0 +1,75 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: ice-kmod-driver-build
+  namespace: kmod-ice
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/worker: ''
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'ice-kmod-driver-container:1.3.2'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      pullSecret:
+        name: default-dockercfg-9hdp6
+      buildArgs:
+        - name: KMODVER
+          value: 1.3.2
+  postCommit: {}
+  source:
+    type: Git
+    dockerfile: >
+      FROM
+      quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:f32089a499c1743631e929717adb972ac48e15606716ccf09261052353ee43ea
+
+      WORKDIR /build/
+
+      RUN yum -y install git rpm-build gcc
+
+      # Expecting kmod software version as an input to the build 
+
+      ARG KMODVER=1.3.2
+
+      RUN wget
+      "https://sourceforge.net/projects/e1000/files/ice%20stable/$KMODVER/ice-$KMODVER.tar.gz"
+      \
+        && rpmbuild --define "_topdir `pwd`" -tb ice-$KMODVER.tar.gz 
+
+      # Prep and build the module  
+
+      RUN dnf install -y RPMS/x86_64/ice-$KMODVER-1.x86_64.rpm 
+
+      # Add the helper tools 
+
+      WORKDIR /root/kvc-ice-kmod
+
+      ADD Makefile . 
+
+      ADD ice-kmod-lib.sh . 
+
+      ADD ice-kmod-wrapper.sh . 
+
+      ADD ice-kmod.conf .
+
+      RUN mkdir -p /usr/lib/kvc/
+
+      RUN mkdir -p /etc/kvc/
+
+      RUN make install
+
+      RUN systemctl enable kmods-via-containers@kvc-ice-kmod
+    git:
+      uri: 'https://github.com/atyronesmith/kvc-ice-kmod.git'
+      ref: main
+    secrets:
+      - secret:
+          name: entitlement
+  triggers:
+    - type: ConfigChange
+  runPolicy: Serial
