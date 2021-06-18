@@ -41,7 +41,7 @@ spec:
 
       WORKDIR /build/
 
-      RUN yum -y install git rpm-build gcc
+      RUN yum -y install rpm-build gcc
 
       # Expecting kmod software version as an input to the build 
 
