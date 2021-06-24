@@ -1,0 +1,16 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: app-agf-up-ul-policy
+  namespace: openshift-sriov-network-operator
+spec:
+  deviceType: vfio-pci
+  nicSelector:
+    pfNames: 
+    - ens3f0#6-9
+    vendor: "8086"
+  nodeSelector:
+    feature.node.kubernetes.io/network-sriov.capable: 'true'
+  numVfs: 4
+  priority: 99
+  resourceName: app_agf_up_ul
