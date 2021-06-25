@@ -11,6 +11,6 @@ spec:
     vendor: "8086"
   nodeSelector:
     feature.node.kubernetes.io/network-sriov.capable: 'true'
-  numVfs: 1
+  numVfs: 64
   priority: 99
   resourceName: infradcf
