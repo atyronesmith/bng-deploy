@@ -34,12 +34,14 @@ spec:
           value: 1.3.2
         - name: KMOD_DDP_PACKAGE
           value: https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip
+        - name: CONTAINER_IMAGE_URL
+          value: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:abf3de7de03664ff637ab6ae9fb73a7fcff8ac59b2c47862eeffac14fa80da31
+
   postCommit: {}
   source:
     type: Git
     dockerfile: >
-      FROM
-      quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:f32089a499c1743631e929717adb972ac48e15606716ccf09261052353ee43ea
+      FROM $CONTAINER_IMAGE_URL
 
       WORKDIR /build/
 
@@ -81,11 +83,12 @@ spec:
 
       RUN wget "$KMOD_DDP_PACKAGE"
 
-      RUN package_zip_file=$(basename "$KMOD_DDP_PACKAGE") && 
-        mkdir -p "/var/lib/firmware/updates/intel/ice/ddp/" &&
-        unzip "$package_zip_file" -d "/var/lib/firmware/updates/intel/ice/ddp/" &&
-        rm -fv "/var/lib/firmware/updates/intel/ice/ddp/ice.pkg" &&
-        package_file="${package_zip_file%.zip}.pkg" && mv -f "/var/lib/firmware/updates/intel/ice/ddp/$package_file" "/var/lib/firmware/updates/intel/ice/ddp/ice.pkg"
+      RUN package_zip_file=$(basename "$KMOD_DDP_PACKAGE") && \
+        mkdir -p "/var/lib/firmware/updates/intel/ice/ddp/" && \
+        unzip "$package_zip_file" -d "/var/lib/firmware/updates/intel/ice/ddp/" && \
+        rm -fv "/var/lib/firmware/updates/intel/ice/ddp/ice.pkg" && \
+        package_file="${package_zip_file%.zip}.pkg" && \
+        mv -f "/var/lib/firmware/updates/intel/ice/ddp/$package_file" "/var/lib/firmware/updates/intel/ice/ddp/ice.pkg"
     git:
       uri: "https://github.com/atyronesmith/kvc-ice-kmod.git"
       ref: main

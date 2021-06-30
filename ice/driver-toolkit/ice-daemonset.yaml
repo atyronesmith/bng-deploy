@@ -29,5 +29,12 @@ spec:
                   ]
           securityContext:
             privileged: true
+          volumeMounts:
+            - name: host
+              mountPath: /host
+      volumes:
+        - name: host
+          hostPath:
+            path: /
       nodeSelector:
         node-role.kubernetes.io/worker: ""
