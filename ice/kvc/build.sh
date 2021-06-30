@@ -1,7 +1,15 @@
 #!/bin/bash
 
 export DDP_PKG="https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip"
+
+# The DDP package cannot be placed in /lib/modules/... as this filesystem is immutable 
+# in RHCOS.  Place the package in /var, but you will need to following additional
+# kernel arg to tell modprobe to look elsewhere...
+#
+# firmware_class.path='/var/lib/firmware/updates/intel/ice/ddp/'
 export ICE_PKG_ROOT="/var"
+
+export KMOD_DDP_PACKAGE=${KMOD_SOFTWARE_EXTRA_1:-https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip}
 
 set -e
 
@@ -104,12 +112,12 @@ build_ice_pkg() {
         # shellcheck disable=SC1091
         source build/kvc-ice-kmod/ice-kmod.conf
 
-        package_zip_file=$(basename "$KMOD_SOFTWARE_EXTRA_1")
+        package_zip_file=$(basename "$KMOD_DDP_PACKAGE")
 
         cd build/package
 
         if [ ! -e "$package_zip_file" ]; then
-            wget "$KMOD_SOFTWARE_EXTRA_1"
+            wget "$KMOD_DDP_PACKAGE"
         fi
 
         mkdir -p "${FAKEROOT}/${ICE_PKG_ROOT}/lib/firmware/updates/intel/ice/ddp/"
@@ -169,6 +177,9 @@ build)
         exit 1
     fi
     build_ice_kmod "$1"
+    build_ice_pkg
+    ;;
+build-pkg)
     build_ice_pkg
     ;;
 headers)
