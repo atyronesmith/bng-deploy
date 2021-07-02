@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ice-ddp-pkg-container
+spec:
+  selector:
+    matchLabels:
+      app: ice-ddp-pkg-container
+  template:
+    metadata:
+      labels:
+        app: ice-ddp-pkg-container
+    spec:
+      serviceAccount: kmod-driver-container
+      serviceAccountName: kmod-driver-container
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/kmod-ice/ice-ddp-pkg-container:1.3.2
+          name: ice-ddp-pkg-container
+          imagePullPolicy: Always
+          command: 
+            - /bin/sleep
+            - '604000'
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host
+              mountPath: /host
+      volumes:
+        - name: host
+          hostPath:
+            path: /
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
