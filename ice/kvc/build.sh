@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export DDP_PKG="https://downloadmirror.intel.com/30335/eng/ice_comms-1.3.24.0.zip"
-
 # The DDP package cannot be placed in /lib/modules/... as this filesystem is immutable 
 # in RHCOS.  Place the package in /var, but you will need to following additional
 # kernel arg to tell modprobe to look elsewhere...
