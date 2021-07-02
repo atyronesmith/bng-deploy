@@ -1,0 +1,9 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: agful
+  namespace: openshift-sriov-network-operator
+spec:
+  spoofChk: "on"
+  networkNamespace: bng
+  resourceName: app_agf_up_ul
